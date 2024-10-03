@@ -76,7 +76,7 @@ public class HoaDonView extends javax.swing.JPanel {
      * Creates new form HoaDonView
      */
     public HoaDonView() {
-        initComponents();
+        initComponents();   
         fillCboTenNV();
         fillCboLdv();
         fillCboLsp();
@@ -275,7 +275,7 @@ public class HoaDonView extends javax.swing.JPanel {
             public void changedUpdate(DocumentEvent e) {
                 updateKhachHangInfo();
             }
-        });
+        });       
     }
 
     private void updateKhachHangInfo() {

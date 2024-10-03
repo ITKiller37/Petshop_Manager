@@ -52,7 +52,8 @@ public class ThongKeView extends javax.swing.JPanel {
          DefaultTableModel tblModel =(DefaultTableModel) tblThongKeSP.getModel();
         tblModel.setRowCount(0);
         for(ThongKeSP tk:ds){
-            Object[] data ={tk.getTenSP(),tk.getTongSL(),tk.getSlConLai(),tk.getSlDaBan()};
+            String tinhTrangHang = (tk.getSlConLai() > 0) ? "Còn hàng" : "Hết hàng";
+            Object[] data ={tk.getTenSP(),tk.getTongSL(),tk.getSlConLai(),tk.getSlDaBan(),tinhTrangHang};
             tblModel.addRow(data);
         }
     }
@@ -116,13 +117,14 @@ public class ThongKeView extends javax.swing.JPanel {
 
         jPanel1.setBackground(new java.awt.Color(242, 227, 227));
 
-        tblThongKeSP.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
+        tblThongKeSP.setFont(new java.awt.Font("Roboto", 0, 14));
         tblThongKeSP.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
             new String [] {
-                "Tên Sản Phẩm", "Tổng Số Lượng", "Số Lượng Còn Lại", "Số Lượng Đã Bán"
+                "Tên Sản Phẩm", "Tổng Số Lượng", "Số Lượng Còn Lại", "Số Lượng Đã Bán",
+                "Tình Trạng Hàng"
             }
         ));
         tblThongKeSP.setRowHeight(25);
