@@ -95,6 +95,5 @@ public class Pet {
     public void setMaKH(int maKH) {
         this.maKH = maKH;
     }
-    
-    
+
 }

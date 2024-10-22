@@ -297,6 +297,8 @@ public class LoaiDichVuView extends javax.swing.JPanel {
             JOptionPane.showMessageDialog(this, "Mời Bạn Nhập Đầy Đủ Thông Tin");
         }else if(check(txtMaLH.getText())==true){
             JOptionPane.showMessageDialog(this, "Mã Loại Hình Đã Tồn Tại");
+        }else if(!txtTenLH.getText().matches("^[\\p{L}\\s]+$")){
+            JOptionPane.showMessageDialog(this, "Tên Loại Dịch Vụ không hợp lệ. Vui lòng không nhập ký tự đặc biệt.");
         }else{
             LoaiDichVu ldv = this.getFormData();
             LDVRepo.creat(ldv);
@@ -319,10 +321,20 @@ public class LoaiDichVuView extends javax.swing.JPanel {
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
         LoaiDichVu ldv = this.getFormData();
+        
+        boolean isLinkedLDV = LDVRepo.isLinkedLDV(ldv.getMaLDV());
+        
+        if (isLinkedLDV) {
+        JOptionPane.showMessageDialog(this, "Dữ liệu không thể xóa");
+        } else {
+        int confirm = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn xóa loại dịch vụ này không?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
         LDVRepo.delete(ldv.getMaLDV());
         JOptionPane.showMessageDialog(this, "Xóa Thành Công");
         loadToTable(LDVRepo.search(""));
         hienThi(0);
+        }
+        }
     }//GEN-LAST:event_btnDeleteActionPerformed
 
 

@@ -126,6 +126,14 @@ public class NhanVienView extends javax.swing.JPanel {
         }
     }
 }
+      public boolean check(int ma){
+        for(int i=0;i<ds.size();i++){
+            if(ds.get(i).getMaNV() == ma){
+                return true;
+            }
+        }
+        return false;
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -378,16 +386,13 @@ public class NhanVienView extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
-         if(txtTenNV.getText().equals("") || txtSdt.getText().equals("") || txtEmail.getText().equals("") || txtChucVu.getText().equals("") 
-                || txtCongViec.getText().equals("") || txtLuong.getText().equals("")){
-             JOptionPane.showMessageDialog(this, "Mời Bạn Nhập Đầy Đủ Thông Tin");        
-        }else{
+         if(validateForm(false)){
             NhanVien nv = this.getFormData(false);
             NVRepo.creat(nv);
             JOptionPane.showMessageDialog(this, "Thêm Thành Công");
             loadToTable(NVRepo.search(""));
             NhanVienDialog.dispose();
-        }
+         }
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
@@ -402,11 +407,13 @@ public class NhanVienView extends javax.swing.JPanel {
     }//GEN-LAST:event_btnThemActionPerformed
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
-        NhanVien nv = this.getFormData(true);
-        NVRepo.update(nv);
-        JOptionPane.showMessageDialog(this, "Sửa Thành Công");
-        loadToTable(NVRepo.search(""));
-        NhanVienDialog.dispose();
+        if(validateForm(true)){
+            NhanVien nv = this.getFormData(true);
+            NVRepo.update(nv);
+            JOptionPane.showMessageDialog(this, "Sửa Thành Công");
+            loadToTable(NVRepo.search(""));
+            NhanVienDialog.dispose();
+        }
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     private void tblNhanVienMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblNhanVienMouseClicked
@@ -428,12 +435,102 @@ public class NhanVienView extends javax.swing.JPanel {
 
     private void btnXoaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnXoaActionPerformed
         NhanVien nv = this.getFormData(true);
+        
+        boolean isLinkedNV = NVRepo.isLinkedNV(nv.getMaNV());
+        
+         if (isLinkedNV) {
+        JOptionPane.showMessageDialog(this, "Dữ liệu không thể xóa");
+        } else {
+        int confirm = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn xóa nhân viên này không?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
         NVRepo.delete(nv.getMaNV());
         JOptionPane.showMessageDialog(this, "Xóa Thành Công");
         loadToTable(NVRepo.search(""));
         hienThi(0);
+        }
+        }
     }//GEN-LAST:event_btnXoaActionPerformed
 
+    public boolean validateForm(boolean isUpdateNv) {
+    
+        String maNVStr = txtMaNV.getText().trim();
+    
+    if (!isUpdateNv) {     
+    if (!maNVStr.isEmpty()) {
+        try {
+            int maNV = Integer.parseInt(maNVStr);
+
+            // Gọi hàm check() để kiểm tra mã khách hàng trùng
+            if (check(maNV)) {
+                JOptionPane.showMessageDialog(this, "Mã nhân viên đã tồn tại. Vui lòng nhập mã khác.");
+                txtMaNV.requestFocus();
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Mã nhân viên phải là số nguyên hợp lệ.");
+            txtMaNV.requestFocus();
+            return false;
+        }
+    }
+    }
+     
+    if (txtTenNV.getText().trim().isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Tên Nhân Viên không được để trống.");
+        txtTenNV.requestFocus();
+        return false;
+    }
+    
+    if (!txtTenNV.getText().matches("^[\\p{L}\\s]+$")) {
+    JOptionPane.showMessageDialog(this, "Tên Nhân Viên không hợp lệ. Vui lòng không nhập ký tự đặc biệt.");
+    txtTenNV.requestFocus();
+    return false;
+    }
+
+    String phone = txtSdt.getText().trim();
+    if (phone.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Số điện thoại không được để trống.");
+        return false;
+    } else if (!phone.matches("\\d{10}")) { 
+        JOptionPane.showMessageDialog(this, "Số điện thoại phải gồm 10 chữ số.");
+        return false;
+    }
+
+    
+    String email = txtEmail.getText().trim();
+    if (email.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Email không được để trống.");
+        return false;
+    } else if (!email.matches("^[a-zA-Z0-9._%+-]+@gmail\\.com$")) {
+        JOptionPane.showMessageDialog(this, "Email phải thuộc miền '@gmail.com'.");
+        return false;
+    }
+
+    
+    if (txtChucVu.getText().trim().isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Chức vụ không được để trống.");
+        return false;
+    }
+
+    
+    if (txtCongViec.getText().trim().isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Công việc không được để trống.");
+        return false;
+    }
+
+    
+    try {
+        float salary = Float.parseFloat(txtLuong.getText().trim());
+        if (salary <= 0) {
+            JOptionPane.showMessageDialog(this, "Lương phải lớn hơn 0.");
+            return false;
+        }
+    } catch (NumberFormatException e) {
+        JOptionPane.showMessageDialog(this, "Lương phải là một số hợp lệ.");
+        return false;
+    }
+
+    return true;
+}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JDialog NhanVienDialog;

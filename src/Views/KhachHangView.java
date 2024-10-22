@@ -213,6 +213,34 @@ public class KhachHangView extends javax.swing.JPanel {
         }
     }
 }
+      
+       public boolean check(int ma){
+        for(int i=0;i<ds.size();i++){
+            if(ds.get(i).getMaKH()== ma){
+                return true;
+            }
+        }
+        return false;
+    }
+       
+       public boolean check1(int maPet){
+        for(int i=0;i<ds.size();i++){
+            if(ds1.get(i).getMaPet()== maPet){
+                return true;
+            }
+        }
+        return false;
+    }
+       
+   public boolean checkMaKH(int maKH) {
+    ArrayList<Integer> khList = PTRepo.getAllMaKH();  
+    for (Integer kh : khList) {  
+        if (kh == maKH) { 
+            return true;   
+        }
+    }
+    return false; 
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -733,23 +761,23 @@ public class KhachHangView extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
-         if(txtTenKH.getText().equals("") || txtSdt.getText().equals("") || txtEmail.getText().equals("") || txtDiaChi.getText().equals("")){
-             JOptionPane.showMessageDialog(this, "Mời Bạn Nhập Đầy Đủ Thông Tin");        
-        }else{
+       if(validateKhachHangForm(false)){
             KhachHang kh = this.getFormData(false);
             KHRepo.creat(kh);
             JOptionPane.showMessageDialog(this, "Thêm Thành Công");
             loadToTable(KHRepo.search(""));
-           KhachHangDialog.dispose();
-        }
+            KhachHangDialog.dispose();
+       }
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
-        KhachHang kh = this.getFormData(true);
-        KHRepo.update(kh);
-        JOptionPane.showMessageDialog(this, "Sửa Thành Công");
-        loadToTable(KHRepo.search(""));
-        KhachHangDialog.dispose();
+        if(validateKhachHangForm(true)){
+            KhachHang kh = this.getFormData(true);
+            KHRepo.update(kh);
+            JOptionPane.showMessageDialog(this, "Sửa Thành Công");
+            loadToTable(KHRepo.search(""));
+            KhachHangDialog.dispose();
+        }
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
@@ -757,24 +785,23 @@ public class KhachHangView extends javax.swing.JPanel {
     }//GEN-LAST:event_btnExitActionPerformed
 
     private void btnAddPetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddPetActionPerformed
-         if(txtTenPet.getText().equals("") || txtLoaiPet.getText().equals("") || txtGiong.getText().equals("") 
-                 || txtTuoi.getText().equals("") || txtcanNang.getText().equals("") || txtMaKHP.getText().equals("")){
-             JOptionPane.showMessageDialog(this, "Mời Bạn Nhập Đầy Đủ Thông Tin");        
-        }else{
+         if(validatePetForm(false)){
             Pet pt = this.getFormDataPet(false);
             PTRepo.creat(pt);
             JOptionPane.showMessageDialog(this, "Thêm Thành Công");
             loadToTable1(PTRepo.search(""));
-           PetDialog.dispose();
-        }
+            PetDialog.dispose();
+         }
     }//GEN-LAST:event_btnAddPetActionPerformed
 
     private void btnUpdatePetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdatePetActionPerformed
-        Pet pt = this.getFormDataPet(true);
-        PTRepo.update(pt);
-        JOptionPane.showMessageDialog(this, "Sửa Thành Công");
-        loadToTable1(PTRepo.search(""));
-        PetDialog.dispose();
+       if(validatePetForm(true)){
+            Pet pt = this.getFormDataPet(true);
+            PTRepo.update(pt);
+            JOptionPane.showMessageDialog(this, "Sửa Thành Công");
+            loadToTable1(PTRepo.search(""));
+            PetDialog.dispose();
+       }
     }//GEN-LAST:event_btnUpdatePetActionPerformed
 
     private void btnExitPetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitPetActionPerformed
@@ -801,7 +828,7 @@ public class KhachHangView extends javax.swing.JPanel {
     }//GEN-LAST:event_btnSuaPetActionPerformed
 
     private void btnDeletePetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeletePetActionPerformed
-        Pet pt = this.getFormDataPet(true);
+         Pet pt = this.getFormDataPet(true);
         PTRepo.delete(pt.getMaPet());
         JOptionPane.showMessageDialog(this, "Xóa Thành Công");
         loadToTable1(PTRepo.search(""));
@@ -829,10 +856,20 @@ public class KhachHangView extends javax.swing.JPanel {
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
         KhachHang kh = this.getFormData(true);
-        KHRepo.delete(kh.getMaKH());
-        JOptionPane.showMessageDialog(this, "Xóa Thành Công");
-        loadToTable(KHRepo.search(""));
-        hienThi(0);
+        
+        boolean isLinkedKH = KHRepo.isLinkedKH(kh.getMaKH());
+        
+        if (isLinkedKH) {
+        JOptionPane.showMessageDialog(this, "Dữ liệu không thể xóa");
+        } else {
+        int confirm = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn xóa khách hàng này không?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            KHRepo.delete(kh.getMaKH());
+            JOptionPane.showMessageDialog(this, "Xóa Thành Công");
+            loadToTable(KHRepo.search(""));
+            hienThi(0);
+        }
+        }
     }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void tblKhachHangMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblKhachHangMouseClicked
@@ -845,6 +882,139 @@ public class KhachHangView extends javax.swing.JPanel {
         hienThi1(index);
     }//GEN-LAST:event_tblPetMouseClicked
 
+     private boolean validateKhachHangForm(boolean isUpdateKh) {
+         String maKHStr = txtMaKH.getText().trim();
+    
+         
+    if (!isUpdateKh) {     
+    if (!maKHStr.isEmpty()) {
+        try {
+            int maKH = Integer.parseInt(maKHStr);
+
+            // Gọi hàm check() để kiểm tra mã khách hàng trùng
+            if (check(maKH)) {
+                JOptionPane.showMessageDialog(this, "Mã Khách Hàng đã tồn tại. Vui lòng nhập mã khác.");
+                txtMaKH.requestFocus();
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Mã Khách Hàng phải là số nguyên hợp lệ.");
+            txtMaKH.requestFocus();
+            return false;
+        }
+    }
+    }
+     
+     if (txtTenKH.getText().trim().isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Tên Khách Hàng không được để trống");
+        txtTenKH.requestFocus();
+        return false;
+    }
+     
+     if (!txtTenKH.getText().matches("^[\\p{L}\\s]+$")) {
+    JOptionPane.showMessageDialog(this, "Tên Khách Hàng không hợp lệ. Vui lòng không nhập ký tự đặc biệt.");
+    txtTenKH.requestFocus();
+    return false;
+    }
+     
+    if (txtSdt.getText().trim().isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Số điện thoại không được để trống");
+        txtSdt.requestFocus();
+        return false;
+    }
+    if (!txtSdt.getText().matches("\\d{10}")) {
+        JOptionPane.showMessageDialog(this, "Số điện thoại không hợp lệ. Vui lòng nhập đúng 10 chữ số.");
+        txtSdt.requestFocus();
+        return false;
+    }
+    if (txtEmail.getText().trim().isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Email không được để trống");
+        txtEmail.requestFocus();
+        return false;
+    }
+    if (!txtEmail.getText().matches("^[a-zA-Z0-9._%+-]+@gmail\\.com$")) {
+        JOptionPane.showMessageDialog(this, "Email không hợp lệ");
+        txtEmail.requestFocus();
+        return false;
+    }
+    if (txtDiaChi.getText().trim().isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Địa chỉ không được để trống");
+        txtDiaChi.requestFocus();
+        return false;
+    }
+    return true;
+}
+
+     private boolean validatePetForm(boolean isUpdatePt) {
+        String maPTStr = txtMaPet.getText().trim();
+        
+        
+        if (txtMaKHP.getText().trim().isEmpty() || !txtMaKHP.getText().matches("\\d+")) {
+        JOptionPane.showMessageDialog(this, "Mã Khách Hàng phải là số và không được để trống");
+        txtMaKHP.requestFocus();
+        return false;
+    }
+        
+     int maKHP = Integer.parseInt(txtMaKHP.getText().trim());
+     if (!checkMaKH(maKHP)) {
+            JOptionPane.showMessageDialog(this, "Mã Khách Hàng không tồn tại.");
+            txtMaKHP.requestFocus();
+            return false;
+        }
+     
+        if(!isUpdatePt){
+        if (!maPTStr.isEmpty()) {
+        try {
+            int maPT = Integer.parseInt(maPTStr);
+
+            if (check(maPT)) {
+                JOptionPane.showMessageDialog(this, "Mã Pet đã tồn tại. Vui lòng nhập mã khác.");
+                txtMaKH.requestFocus();
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Mã Pet phải là số nguyên hợp lệ.");
+            txtMaKH.requestFocus();
+            return false;
+        }
+     }
+     }    
+        
+     
+    if (txtTenPet.getText().trim().isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Tên Pet không được để trống");
+        txtTenPet.requestFocus();
+        return false;
+    }
+    
+    if (!txtTenPet.getText().matches("^[\\p{L}\\s]+$")) {
+    JOptionPane.showMessageDialog(this, "Tên Pet không hợp lệ. Vui lòng không nhập ký tự đặc biệt.");
+    txtTenPet.requestFocus();
+    return false;
+    }
+    if (txtLoaiPet.getText().trim().isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Loài Pet không được để trống");
+        txtLoaiPet.requestFocus();
+        return false;
+    }
+    if (txtGiong.getText().trim().isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Giống Pet không được để trống");
+        txtGiong.requestFocus();
+        return false;
+    }
+    if (txtTuoi.getText().trim().isEmpty() || !txtTuoi.getText().matches("\\d+")) {
+        JOptionPane.showMessageDialog(this, "Tuổi Pet phải là số dương và không được để trống");
+        txtTuoi.requestFocus();
+        return false;
+    }
+    if (txtcanNang.getText().trim().isEmpty() || !txtcanNang.getText().matches("\\d+(\\.\\d+)?")) {
+        JOptionPane.showMessageDialog(this, "Cân nặng phải là số dương và không được để trống");
+        txtcanNang.requestFocus();
+        return false;
+    }
+    
+    return true;
+}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JDialog KhachHangDialog;

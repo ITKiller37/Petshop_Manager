@@ -114,4 +114,20 @@ public class RP_NhanVien {
          }
          return dsNhanVien;
      }
+     
+      public boolean isLinkedNV(int maNV) {
+    String SQL = "SELECT COUNT(*) FROM HoaDon WHERE MaNV = ?";
+    try ( 
+        PreparedStatement ps = this.conn.prepareStatement(SQL)) {
+        ps.setInt(1, maNV);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            int count = rs.getInt(1);
+            return count > 0;
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return false; 
+    }
 }

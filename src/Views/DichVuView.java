@@ -5,6 +5,7 @@
 package Views;
 
 import Models.DichVu;
+import Models.LoaiDichVu;
 import Repositories.RP_DichVu;
 import java.awt.Color;
 import java.awt.Font;
@@ -99,6 +100,16 @@ public class DichVuView extends javax.swing.JPanel {
         }
         return false;
     }
+         
+         public boolean checkMaLDV(String maLDV) {
+            ArrayList<String> ldvList = DVRepo.getAllMaLDV();
+             for (String ldv : ldvList) {  
+               if (ldv.equals(maLDV)) { 
+                 return true;
+               }
+              }
+                return false;
+        }
          
          public void newTable(){
              txtMaLDV.setText("");
@@ -373,14 +384,10 @@ public class DichVuView extends javax.swing.JPanel {
     }//GEN-LAST:event_tblDichVuMouseClicked
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
-         if(txtMaLDV.getText().equals("") || txtMaDV.getText().equals("") || txtTenDV.getText().equals("") || txtGia.getText().equals("")){
-             JOptionPane.showMessageDialog(this, "Mời Bạn Nhập Đầy Đủ Thông Tin");
-        }else if(check(txtMaDV.getText())==true){
-            JOptionPane.showMessageDialog(this, "Mã Dịch Vụ Đã Tồn Tại");
-        }else{
+        if(validateDichVuForm(false)){
             DichVu dv = this.getFormData();
             DVRepo.creat(dv);
-            JOptionPane.showMessageDialog(this, "Thêm Thành Công");
+            JOptionPane.showMessageDialog(this, "Thêm thành công");
             loadToTable(DVRepo.search(""));
             DichVuDialog.dispose();
         }
@@ -403,21 +410,103 @@ public class DichVuView extends javax.swing.JPanel {
     }//GEN-LAST:event_btnSuaActionPerformed
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
-            DichVu dv = this.getFormData();
-            DVRepo.update(dv);
-            JOptionPane.showMessageDialog(this, "Sửa Thành Công");
-            loadToTable(DVRepo.search(""));
-            DichVuDialog.dispose();
+            if(validateDichVuForm(true)){
+                DichVu dv = this.getFormData();
+                DVRepo.update(dv);
+                JOptionPane.showMessageDialog(this, "Sửa Thành Công");
+                loadToTable(DVRepo.search(""));
+                DichVuDialog.dispose();
+            }
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
             DichVu dv = this.getFormData();
+            
+            boolean isLinkedDV = DVRepo.isLinkedDV(dv.getMaDV());
+            
+            if (isLinkedDV) {
+               JOptionPane.showMessageDialog(this, "Dữ liệu không thể xóa");
+            } else {
+            int confirm = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn xóa dịch vụ này không?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
             DVRepo.delete(dv.getMaDV());
             JOptionPane.showMessageDialog(this, "Xóa Thành Công");
             loadToTable(DVRepo.search(""));
             hienThi(0);
+            }
+            }
     }//GEN-LAST:event_btnDeleteActionPerformed
 
+    private boolean validateDichVuForm(boolean isUpdateDv) {
+    String maLDVStr = txtMaLDV.getText().trim();
+    String maDVStr = txtMaDV.getText().trim();
+    String tenDV = txtTenDV.getText().trim();
+    String giaStr = txtGia.getText().trim();
+
+    // Kiểm tra mã LDV rỗng
+    if (maLDVStr.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Mã Loại Dịch Vụ không được để trống.");
+        txtMaLDV.requestFocus();
+        return false;
+    }
+
+        if (!checkMaLDV(maLDVStr)) {
+            JOptionPane.showMessageDialog(this, "Mã Loại Dịch Vụ không tồn tại.");
+            txtMaLDV.requestFocus();
+            return false;
+        }
+
+        if (maDVStr.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Mã Dịch Vụ không được để trống.");
+        txtMaDV.requestFocus();
+        return false;
+    }
+          
+    if (!isUpdateDv) {     
+    if (!maDVStr.isEmpty()) {
+            if (check(maDVStr)) {
+                JOptionPane.showMessageDialog(this, "Mã Dịch Vụ đã tồn tại. Vui lòng nhập mã khác.");
+                txtMaDV.requestFocus();
+                return false;
+            }
+    }
+    }
+
+    // Kiểm tra tên DV rỗng
+    if (tenDV.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Tên Dịch Vụ không được để trống.");
+        txtTenDV.requestFocus();
+        return false;
+    }
+    if (!txtTenDV.getText().matches("^[\\p{L}\\s]+$")) {
+    JOptionPane.showMessageDialog(this, "Tên Dịch Vụ không hợp lệ. Vui lòng không nhập ký tự đặc biệt.");
+    txtTenDV.requestFocus();
+    return false;
+    }
+
+    // Kiểm tra giá rỗng
+    if (giaStr.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Giá không được để trống.");
+        txtGia.requestFocus();
+        return false;
+    }
+
+    // Kiểm tra giá có phải số hay không
+    try {
+        double gia = Double.parseDouble(giaStr);
+        if (gia <= 0) {
+            JOptionPane.showMessageDialog(this, "Giá phải là số dương.");
+            txtGia.requestFocus();
+            return false;
+        }
+    } catch (NumberFormatException e) {
+        JOptionPane.showMessageDialog(this, "Giá phải là số hợp lệ.");
+        txtGia.requestFocus();
+        return false;
+    }
+
+    return true; // Nếu tất cả các kiểm tra đều qua
+}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JDialog DichVuDialog;

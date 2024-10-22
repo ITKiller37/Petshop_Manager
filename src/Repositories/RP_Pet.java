@@ -21,7 +21,7 @@ public class RP_Pet {
     public ArrayList<Pet> search(String keyWord){
         String SQL = "SELECT pt.MaPet,pt.TenPet,pt.LoaiPet,pt.GiongLoai,pt.Tuoi,"
                 + "pt.CanNang,pt.TrangThaiTiemChung,kh.MaKH FROM Pet pt JOIN KhachHang kh ON kh.MaKH = pt.MaKH";
-        
+              
         if(keyWord.trim().length()!=0){
             SQL += " WHERE TenPET LIKE ? OR LoaiPet LIKE ? OR GiongLoai LIKE ?";
         }
@@ -98,4 +98,23 @@ public class RP_Pet {
             e.printStackTrace();
         }
     }
+       
+   public ArrayList<Integer> getAllMaKH() {
+    String SQL = "SELECT MaKH FROM KhachHang";
+    ArrayList<Integer> khList = new ArrayList<>();
+    
+    try {
+        PreparedStatement ps = this.conn.prepareStatement(SQL);
+        ResultSet rs = ps.executeQuery();
+        
+        while (rs.next()) {
+            int maKH = rs.getInt("MaKH");  
+            khList.add(maKH);              
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    
+    return khList;  
+}
 }

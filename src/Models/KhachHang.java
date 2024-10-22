@@ -66,5 +66,4 @@ public class KhachHang {
         this.diaChi = diaChi;
     }
     
-    
 }

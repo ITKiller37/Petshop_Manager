@@ -130,4 +130,39 @@ public class RP_SanPham {
 
     return tenSP; 
 }
+     
+      public boolean isLinkedSP(String maSP) {
+    String SQL = "SELECT COUNT(*) FROM HoaDonChiTiet WHERE MaSP = ?";
+    try ( 
+        PreparedStatement ps = this.conn.prepareStatement(SQL)) {
+        ps.setString(1, maSP);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            int count = rs.getInt(1);
+            return count > 0;
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return false; 
+    }
+      
+      public ArrayList<String> getAllMaLSP() {
+    String SQL = "SELECT MaLSP FROM LoaiSanPham";
+    ArrayList<String> lspList = new ArrayList<>();
+    
+    try {
+        PreparedStatement ps = this.conn.prepareStatement(SQL);
+        ResultSet rs = ps.executeQuery();
+        
+        while (rs.next()) {
+            String maLSP = rs.getString("MaLSP");
+            lspList.add(maLSP);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    
+    return lspList;
+}
 }

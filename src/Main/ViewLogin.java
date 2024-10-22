@@ -223,11 +223,13 @@ public class ViewLogin extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(this, "Đăng nhập thất bại");
             } else if (vaiTro.equals("0")) {
                 JOptionPane.showMessageDialog(this, "Đăng nhập thành công");
-                ViewMain trangChu = new ViewMain();
+                ViewMain trangChu = new ViewMain(vaiTro);
                 trangChu.setVisible(true);
                 this.dispose();
-            } else {
-                JOptionPane.showMessageDialog(this, "Dang nhap thanh cong tai khoan khach hang");               
+            } else if (vaiTro.equals("1")){
+                JOptionPane.showMessageDialog(this, "Đăng nhập thành công"); 
+                ViewMain trangChu = new ViewMain(vaiTro);
+                trangChu.setVisible(true);
                 this.dispose();
             }
 

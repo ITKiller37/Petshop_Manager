@@ -161,6 +161,16 @@ public class SanPhamView extends javax.swing.JPanel {
         return false;
     }
         
+        public boolean checkMaLSP(String maLSP) {
+            ArrayList<String> lspList = SPRepo.getAllMaLSP();
+             for (String lsp : lspList) {  
+               if (lsp.equals(maLSP)) { 
+                 return true;
+               }
+              }
+                return false;
+        }
+        
     public class TableUtils {
 
     public static void setHeaderStyle(JTable table) {
@@ -550,12 +560,7 @@ public class SanPhamView extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
-          if(txtMaLsp.getText().equals("") || txtMaSP.getText().equals("") || txtTenSP.getText().equals("") || txtGia.getText().equals("")
-                 ||txtSoLuong.getText().equals("") || txtGhiChu.getText().equals("") ){
-            JOptionPane.showMessageDialog(this, "Mời Bạn Nhập Đầy Đủ Thông Tin");
-        }else if(check(txtMaSP.getText())==true){
-            JOptionPane.showMessageDialog(this, "Mã Sản Phẩm Đã Tồn Tại");
-        }else{
+        if(validateProductForm(false)){
             SanPham sp = this.getFormData();
             SPRepo.creat(sp);
             JOptionPane.showMessageDialog(this, "Thêm Thành Công");
@@ -565,11 +570,13 @@ public class SanPhamView extends javax.swing.JPanel {
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
-        SanPham sp = this.getFormData();
-        SPRepo.update(sp);
-        JOptionPane.showMessageDialog(this, "Sửa Thành Công");
-        loadToTable(SPRepo.search(""));
-        SanPhamDialog.dispose();
+        if(validateProductForm(true)){
+            SanPham sp = this.getFormData();
+            SPRepo.update(sp);
+           JOptionPane.showMessageDialog(this, "Sửa Thành Công");
+           loadToTable(SPRepo.search(""));
+           SanPhamDialog.dispose();
+        }
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
@@ -597,10 +604,20 @@ public class SanPhamView extends javax.swing.JPanel {
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
         SanPham sp = this.getFormData();
+        
+         boolean isLinkedSP = SPRepo.isLinkedSP(sp.getMaSP());
+         
+         if (isLinkedSP) {
+        JOptionPane.showMessageDialog(this, "Dữ liệu không thể xóa");
+        } else {
+        int confirm = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn sản phẩm này không?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
         SPRepo.delete(sp.getMaSP());
         JOptionPane.showMessageDialog(this, "Xóa Thành Công");
         loadToTable(SPRepo.search(""));
         hienThi(0);
+        }
+        }
     }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void tblSanPhamMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblSanPhamMouseClicked
@@ -613,6 +630,8 @@ public class SanPhamView extends javax.swing.JPanel {
             JOptionPane.showMessageDialog(this, "Mời Bạn Nhập Đầy Đủ Thông Tin");
         }else if(check1(txtMaLSP.getText())==true){
             JOptionPane.showMessageDialog(this, "Mã Loại Sản Phẩm Đã Tồn Tại");
+        }else if(!txtTenLSP.getText().matches("^[\\p{L}\\s]+$")){
+            JOptionPane.showMessageDialog(this, "Tên Loại Sản Phẩm không hợp lệ. Vui lòng không nhập ký tự đặc biệt.");    
         }else{
             LoaiSanPham lsp = this.getFormData1();
             LSPRepo.creat(lsp);
@@ -632,10 +651,20 @@ public class SanPhamView extends javax.swing.JPanel {
 
     private void btnDeleteLSPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteLSPActionPerformed
         LoaiSanPham lsp = this.getFormData1();
+        
+        boolean isLinkedLSP = LSPRepo.isLinkedLSP(lsp.getMaLSP());
+        
+        if (isLinkedLSP) {
+        JOptionPane.showMessageDialog(this, "Dữ liệu không thể xóa");
+        } else {
+        int confirm = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn loại sản phẩm này không?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
         LSPRepo.delete(lsp.getMaLSP());
         JOptionPane.showMessageDialog(this, "Xóa Thành Công");
         loadToTable1();
         hienThi(0);
+        }
+        }
     }//GEN-LAST:event_btnDeleteLSPActionPerformed
 
     private void tblLspMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblLspMouseClicked
@@ -644,6 +673,65 @@ public class SanPhamView extends javax.swing.JPanel {
     }//GEN-LAST:event_tblLspMouseClicked
 
 
+     private boolean validateProductForm(boolean isUpdateSp) {
+         String maSP = txtMaSP.getText().trim();
+         String maLsp = txtMaLsp.getText().trim();
+         
+    // Kiểm tra các trường có trống không
+    if (txtMaLsp.getText().trim().isEmpty() || txtMaSP.getText().trim().isEmpty() || 
+        txtTenSP.getText().trim().isEmpty() || txtGia.getText().trim().isEmpty() || 
+        txtSoLuong.getText().trim().isEmpty() || txtGhiChu.getText().trim().isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Mời bạn nhập đầy đủ thông tin.");
+        return false;
+    }
+    
+    if (!checkMaLSP(maLsp)) {
+            JOptionPane.showMessageDialog(this, "Mã Loại Sản Phẩm không tồn tại.");
+            txtMaLsp.requestFocus();
+            return false;
+        }
+    
+    if (!isUpdateSp) {     
+    if (!maSP.isEmpty()) {
+            if (check(maSP)) {
+                JOptionPane.showMessageDialog(this, "Mã Sản Phẩm đã tồn tại. Vui lòng nhập mã khác.");
+                txtMaSP.requestFocus();
+                return false;
+            }
+    }
+    }
+    
+     if (!txtTenSP.getText().matches("^[\\p{L}\\s]+$")) {
+    JOptionPane.showMessageDialog(this, "Tên Sản Phẩm không hợp lệ. Vui lòng không nhập ký tự đặc biệt.");
+    txtTenSP.requestFocus();
+    return false;
+    }
+    // Kiểm tra 'Giá' phải là số và lớn hơn 0
+    try {
+        float gia = Float.parseFloat(txtGia.getText().trim());
+        if (gia <= 0) {
+            JOptionPane.showMessageDialog(this, "'Giá' phải là số dương.");
+            return false;
+        }
+    } catch (NumberFormatException e) {
+        JOptionPane.showMessageDialog(this, "'Giá' phải là số hợp lệ.");
+        return false;
+    }
+
+    // Kiểm tra 'Số Lượng' phải là số nguyên và lớn hơn 0
+    try {
+        int soLuong = Integer.parseInt(txtSoLuong.getText().trim());
+        if (soLuong <= 0) {
+            JOptionPane.showMessageDialog(this, "'Số Lượng' phải là số nguyên dương.");
+            return false;
+        }
+    } catch (NumberFormatException e) {
+        JOptionPane.showMessageDialog(this, "'Số Lượng' phải là số nguyên hợp lệ.");
+        return false;
+    }
+
+    return true;
+}
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JDialog SanPhamDialog;
     private javax.swing.JButton btnAdd;

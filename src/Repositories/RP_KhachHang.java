@@ -78,7 +78,7 @@ public class RP_KhachHang {
         }
     }
      
-      public void delete(int ma){
+       public void delete(int ma){
         String SQL = "DELETE FROM KhachHang WHERE MaKH = ?";
         try {
             PreparedStatement ps = this.conn.prepareStatement(SQL);
@@ -121,7 +121,7 @@ public class RP_KhachHang {
             int maKH = rs.getInt("MaKH");
             String tenKH = rs.getString("TenKH");
             String sdt = rs.getString("SDT");
-            kh = new KhachHang(maKH, tenKH, sdt, null, null); // Thêm thông tin địa chỉ và email là null
+            kh = new KhachHang(maKH, tenKH, sdt, null, null); 
         }
     } catch (SQLException e) {
         e.printStackTrace();
@@ -129,5 +129,21 @@ public class RP_KhachHang {
 
     return kh;
 }
+      
+      public boolean isLinkedKH(int maKH) {
+    String SQL = "SELECT COUNT(*) FROM HoaDon WHERE MaKH = ?";
+    try ( 
+        PreparedStatement ps = this.conn.prepareStatement(SQL)) {
+        ps.setInt(1, maKH);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            int count = rs.getInt(1);
+            return count > 0;
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return false; 
+    }
     
 }

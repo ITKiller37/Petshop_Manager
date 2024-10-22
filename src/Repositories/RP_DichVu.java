@@ -121,4 +121,39 @@ public class RP_DichVu {
 
     return tenDV; 
 }
+     
+     public boolean isLinkedDV(String maDV) {
+    String SQL = "SELECT COUNT(*) FROM HoaDonChiTiet WHERE MaDV = ?";
+    try ( 
+        PreparedStatement ps = this.conn.prepareStatement(SQL)) {
+        ps.setString(1, maDV);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            int count = rs.getInt(1);
+            return count > 0;
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return false; 
+    }
+     
+     public ArrayList<String> getAllMaLDV() {
+    String SQL = "SELECT MaLDV FROM LoaiDichVu";
+    ArrayList<String> ldvList = new ArrayList<>();
+    
+    try {
+        PreparedStatement ps = this.conn.prepareStatement(SQL);
+        ResultSet rs = ps.executeQuery();
+        
+        while (rs.next()) {
+            String maLDV = rs.getString("MaLDV");
+            ldvList.add(maLDV);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    
+    return ldvList;
+}
 }

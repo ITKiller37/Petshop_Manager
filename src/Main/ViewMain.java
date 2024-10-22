@@ -22,11 +22,12 @@ import javax.swing.JOptionPane;
  * @author Dang
  */
 public class ViewMain extends javax.swing.JFrame {
-
+    private String vaiTro; 
     /**
      * Creates new form ViewMain
      */
-    public ViewMain() {
+    public ViewMain(String vaiTro) {
+        this.vaiTro = vaiTro;
         initComponents();
          setBackground(new Color(0,0,0,0));
          menu.initMoving(ViewMain.this);
@@ -44,7 +45,11 @@ public class ViewMain extends javax.swing.JFrame {
                 } else if (index == 4) {
                     setForm(new SanPhamView());
                 } else if (index == 5) {
-                    setForm(new NhanVienView());
+                    if (!vaiTro.equals("1")) {  
+                        setForm(new NhanVienView());
+                    } else {
+                        JOptionPane.showMessageDialog(rootPane, "Bạn không có quyền truy cập!");
+                    }
                 } else if (index == 6) {
                     setForm(new HoaDonView());
                 } else if (index == 7) {
@@ -58,7 +63,12 @@ public class ViewMain extends javax.swing.JFrame {
                 }
             }
          });
+         
          setForm(new TrangChu());
+    }
+    
+    public ViewMain() {
+        this("0");  
     }
     
      private void setForm(JComponent com) {
@@ -69,6 +79,7 @@ public class ViewMain extends javax.swing.JFrame {
         mainPanel.revalidate();
         
     }
+     
 
     /**
      * This method is called from within the constructor to initialize the form.

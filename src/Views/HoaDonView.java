@@ -52,11 +52,13 @@ import java.util.Random;
 import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.RowFilter;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableRowSorter;
 
 /**
  *
@@ -81,6 +83,7 @@ public class HoaDonView extends javax.swing.JPanel {
         fillCboLdv();
         fillCboLsp();
         addListeners();
+        addSearchListener();
         setNgayTao();
         loadToTable();
         
@@ -277,6 +280,25 @@ public class HoaDonView extends javax.swing.JPanel {
             }
         });       
     }
+    
+    private void addSearchListener() {
+    txtTimKiem.getDocument().addDocumentListener(new DocumentListener() {
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+            filterTable();
+        }
+
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+            filterTable();
+        }
+
+        @Override
+        public void changedUpdate(DocumentEvent e) {
+            filterTable();
+        }
+    });
+}
 
     private void updateKhachHangInfo() {
         String maKHText = txtMaKH.getText().trim();
@@ -305,6 +327,42 @@ public class HoaDonView extends javax.swing.JPanel {
             txtSdt.setText("");
         }
     }
+    
+    private void filterTable() {
+    String searchText = txtTimKiem.getText().trim().toLowerCase();
+    DefaultTableModel model = (DefaultTableModel) tblHoaDon.getModel();
+    
+    // Chỉ cần tạo TableRowSorter một lần và sử dụng lại
+    TableRowSorter<DefaultTableModel> sorter = (TableRowSorter<DefaultTableModel>) tblHoaDon.getRowSorter();
+    if (sorter == null) {
+        sorter = new TableRowSorter<>(model);
+        tblHoaDon.setRowSorter(sorter);
+    }
+
+    try {
+        if (searchText.length() == 0) {
+            // Nếu ô tìm kiếm rỗng, hiển thị tất cả các hàng
+            sorter.setRowFilter(null);
+        } else {
+           RowFilter<DefaultTableModel, Integer> customFilter = new RowFilter<DefaultTableModel, Integer>() {
+                @Override
+                public boolean include(Entry<? extends DefaultTableModel, ? extends Integer> entry) {
+                    String maHD = entry.getStringValue(0).toLowerCase(); // Mã HD
+                    String tenNV = entry.getStringValue(1).toLowerCase(); // Tên NV
+                    String tenKH = entry.getStringValue(2).toLowerCase(); // Tên KH
+                    
+                    // Kiểm tra xem searchText có tồn tại trong bất kỳ cột nào không
+                    return maHD.contains(searchText) || tenNV.contains(searchText) || tenKH.contains(searchText);
+                }
+            };
+
+            sorter.setRowFilter(customFilter);
+        }
+    } catch (Exception e) {
+        e.printStackTrace(); // In ra thông tin lỗi để xử lý
+        JOptionPane.showMessageDialog(null, "Có lỗi xảy ra khi lọc bảng: " + e.getMessage());
+    }
+}
 
     private void updateTotal() {
         DefaultTableModel model = (DefaultTableModel) tblThanhToan.getModel();
@@ -461,6 +519,8 @@ public class HoaDonView extends javax.swing.JPanel {
         btnThanhToan = new javax.swing.JButton();
         jScrollPane5 = new javax.swing.JScrollPane();
         tblHoaDonChiTiet = new javax.swing.JTable();
+        txtTimKiem = new javax.swing.JTextField();
+        jLabel10 = new javax.swing.JLabel();
 
         setBackground(new java.awt.Color(242, 227, 227));
 
@@ -727,26 +787,39 @@ public class HoaDonView extends javax.swing.JPanel {
         tblHoaDonChiTiet.setShowVerticalLines(false);
         jScrollPane5.setViewportView(tblHoaDonChiTiet);
 
+        txtTimKiem.setFont(new java.awt.Font("Roboto", 0, 12)); // NOI18N
+
+        jLabel10.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Icon/icons8-search-30.png"))); // NOI18N
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addGap(0, 22, Short.MAX_VALUE)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 913, Short.MAX_VALUE)
-                    .addComponent(jScrollPane4))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(45, 45, 45)
+                        .addComponent(btnThanhToan)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel10)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtTimKiem, javax.swing.GroupLayout.PREFERRED_SIZE, 245, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(0, 22, Short.MAX_VALUE)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 913, Short.MAX_VALUE)
+                            .addComponent(jScrollPane4))))
                 .addGap(37, 37, 37))
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(45, 45, 45)
-                .addComponent(btnThanhToan)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(15, 15, 15)
-                .addComponent(btnThanhToan)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel10)
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(btnThanhToan)
+                        .addComponent(txtTimKiem, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
@@ -771,6 +844,10 @@ public class HoaDonView extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnAddHDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddHDActionPerformed
+              
+            if (!validateFormHD()) {
+                   return; 
+            }
             HoaDon hd = this.getFormData();
             int maKH = Integer.parseInt(txtMaKH.getText());
             int maNV = getMaNV();
@@ -871,6 +948,32 @@ public class HoaDonView extends javax.swing.JPanel {
         return new ByteArrayInputStream(outputStream.toByteArray());
     }
 
+     private boolean validateFormHD() {
+    
+    if (txtMaKH.getText().trim().isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Vui lòng nhập mã khách hàng!");
+        return false;
+    }
+    
+    if (txtTenKH.getText().trim().isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Vui lòng nhập tên khách hàng!");
+        return false;
+    }
+
+    
+    if (txtSdt.getText().trim().isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Vui lòng nhập sdt khách hàng!");
+        return false;
+    }
+    
+    DefaultTableModel thanhToanModel = (DefaultTableModel) tblThanhToan.getModel();
+    if (thanhToanModel.getRowCount() == 0) {
+        JOptionPane.showMessageDialog(this, "Bảng thanh toán không có dữ liệu!");
+        return false;
+    }
+
+    return true;
+}
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel DateTime;
     private javax.swing.JButton btnAddHD;
@@ -881,6 +984,7 @@ public class HoaDonView extends javax.swing.JPanel {
     private javax.swing.JComboBox<String> cboLsp;
     private javax.swing.JComboBox<String> cboTenNV;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -906,6 +1010,7 @@ public class HoaDonView extends javax.swing.JPanel {
     private javax.swing.JTextField txtNgayTao;
     private javax.swing.JTextField txtSdt;
     private javax.swing.JTextField txtTenKH;
+    private javax.swing.JTextField txtTimKiem;
     private javax.swing.JTextField txtTongTien;
     // End of variables declaration//GEN-END:variables
 }

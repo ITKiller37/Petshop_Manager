@@ -113,4 +113,20 @@ public class RP_LoaiSanPham {
     
     return danhSachSanPham;
 }
+      
+       public boolean isLinkedLSP(String maLSP) {
+    String SQL = "SELECT COUNT(*) FROM SanPham WHERE MaLSP = ?";
+    try ( 
+        PreparedStatement ps = this.conn.prepareStatement(SQL)) {
+        ps.setString(1, maLSP);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            int count = rs.getInt(1);
+            return count > 0;
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return false; 
+    }
 }
